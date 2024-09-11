@@ -12,11 +12,30 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<Map<String, String>> tasks = [];
+  //1-
+  List<Map<String, dynamic>> tasks = [];
 
   @override
   void initState() {
     super.initState();
+    _initializeDatabaseAndGetTasks();
+  }
+
+  Future<void> _initializeDatabaseAndGetTasks() async {
+    await createDatabase();
+    await getTask();
+  }
+
+  //2
+  Future<void> getTask() async {
+    tasks = await getDataFromDatabase();
+    setState(() {});
+  }
+
+  Future<void> delteTask(int id) async {
+    await updateTaskStatusToDone(id);
+    await deleteFromDatabase(id);
+    await getTask();
   }
 
   @override
@@ -29,16 +48,22 @@ class _HomeScreenState extends State<HomeScreen> {
           title: Text("Taskes"),
           centerTitle: true,
         ),
-        body: Padding(
-          padding: EdgeInsets.all(16),
-          child: ListView.builder(
-              itemCount: tasks.length,
-              itemBuilder: (context, index) {
-                return CardTodolist(
-                    title: tasks[index]['title']!,
-                    desc: tasks[index]['description']!);
-              }),
-        ),
+        body: tasks.isEmpty
+            ? Center(
+                child: Text("no tasks"),
+              )
+            : Padding(
+                padding: EdgeInsets.all(16),
+                child: ListView.builder(
+                    itemCount: tasks.length,
+                    itemBuilder: (context, index) {
+                      return CardTodolist(
+                        title: tasks[index]['title'] ?? '',
+                        desc: tasks[index]['description'] ?? '',
+                        onDelete: () => delteTask(tasks[index]['id']),
+                      );
+                    }),
+              ),
         floatingActionButton: FloatingActionButton(
             child: Icon(Icons.add),
             onPressed: () async {
@@ -46,9 +71,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   MaterialPageRoute(builder: (context) => AddTaskScreen()));
 
               if (res != null) {
-                setState(() {
-                  tasks.add(res);
-                });
+                //3
+                insertIntoDatabase(
+                    title: res['title'],
+                    desc: res['description'],
+                    date: DateTime.now().toString());
+                await getTask();
               }
             }));
   }
