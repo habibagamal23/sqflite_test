@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite_test/features/home/widgets/todo_card.dart';
 
-import '../../core/Database/local_db.dart';
-import '../add_task/add_task_screen.dart';
+import '../../../core/Database/local_db.dart';
+import '../../../core/sheardprefrance/shaerd.dart';
+import '../../add_task/add_task_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,12 +14,15 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> tasks = [];
+  // final SharedPreferencesHelper _prefsHelper = SharedPreferencesHelper();
+  bool isDarkMode = false;
 
   @override
   void initState() {
     super.initState();
     createDatabase();
     getTasksFromDatabase();
+    // _loadTheme();
   }
 
   Future<void> getTasksFromDatabase() async {
@@ -32,6 +36,17 @@ class _HomeScreenState extends State<HomeScreen> {
     getTasksFromDatabase();
   }
 
+  // void _toggleDarkMode() async {
+  //   isDarkMode = !isDarkMode;
+  //   await _prefsHelper.setTheme(isDarkMode); // حفظ حالة الثيم
+  //   setState(() {});
+  // }
+  //
+  // Future<void> _loadTheme() async {
+  //   isDarkMode = await _prefsHelper.getTheme(); // استرجاع حالة الثيم
+  //   setState(() {});
+  // }
+
   @override
   Widget build(BuildContext context) {
     // app bar
@@ -41,19 +56,14 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text("Taskes"),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(isDarkMode ? Icons.dark_mode : Icons.light_mode),
+            onPressed: (){},
+          ),
+        ],
       ),
-      body: tasks.isEmpty
-          ? Center(child: Text("No tasks available"))
-          : ListView.builder(
-              itemCount: tasks.length,
-              itemBuilder: (context, index) {
-                return CardTodolist(
-                  title: tasks[index]['title'] ?? '',
-                  desc: tasks[index]['desc'] ?? '',
-                  onDelete: () => deleteTask(tasks[index]['id'])
-                );
-              },
-            ),
+      body: _buildTaskList(),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         onPressed: () async {
@@ -72,6 +82,23 @@ class _HomeScreenState extends State<HomeScreen> {
           }
         },
       ),
+    );
+  }
+
+  Widget _buildTaskList() {
+    if (tasks.isEmpty) {
+      return Center(child: Text("No tasks available"));
+    }
+
+    return ListView.builder(
+      itemCount: tasks.length,
+      itemBuilder: (context, index) {
+        return CardTodolist(
+          title: tasks[index]['title'] ?? '',
+          desc: tasks[index]['desc'] ?? '',
+          onDelete: () => deleteTask(tasks[index]['id']),
+        );
+      },
     );
   }
 }
