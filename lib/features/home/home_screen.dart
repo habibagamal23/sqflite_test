@@ -12,11 +12,18 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<Map<String, String>> tasks = [];
+  List<Map<String, dynamic>> tasks = [];
 
   @override
   void initState() {
     super.initState();
+    createDatabase();
+    getTasksFromDatabase();
+  }
+
+  Future<void> getTasksFromDatabase() async {
+    tasks = await getDataFromDatabase();
+    setState(() {});
   }
 
   @override
@@ -25,31 +32,39 @@ class _HomeScreenState extends State<HomeScreen> {
     //text
     //float
     return Scaffold(
-        appBar: AppBar(
-          title: Text("Taskes"),
-          centerTitle: true,
-        ),
-        body: Padding(
-          padding: EdgeInsets.all(16),
-          child: ListView.builder(
+      appBar: AppBar(
+        title: Text("Taskes"),
+        centerTitle: true,
+      ),
+      body: tasks.isEmpty
+          ? Center(child: Text("No tasks available"))
+          : ListView.builder(
               itemCount: tasks.length,
               itemBuilder: (context, index) {
                 return CardTodolist(
-                    title: tasks[index]['title']!,
-                    desc: tasks[index]['description']!);
-              }),
-        ),
-        floatingActionButton: FloatingActionButton(
-            child: Icon(Icons.add),
-            onPressed: () async {
-              final res = await Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => AddTaskScreen()));
+                  title: tasks[index]['title'] ?? '',
+                  desc: tasks[index]['desc'] ?? '',
+                );
+              },
+            ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: () async {
+          final res = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AddTaskScreen()),
+          );
 
-              if (res != null) {
-                setState(() {
-                  tasks.add(res);
-                });
-              }
-            }));
+          if (res != null) {
+            await insertIntoDatabase(
+              title: res['title'],
+              desc: res['description'],
+              date: DateTime.now().toString(),
+            );
+            getTasksFromDatabase();
+          }
+        },
+      ),
+    );
   }
 }

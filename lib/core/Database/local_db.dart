@@ -1,88 +1,75 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+
 late Database database;
 
-
-
-crateDataBase() async {
-// Get a location using getDatabasesPath
+Future<void> createDatabase() async {
   var databasesPath = await getDatabasesPath();
-  print(databasesPath);
-  String path = join(databasesPath, "taskes.db");
-  print(path);
+  String path = join(databasesPath, "tasks.db");
 
-// open the database
   database = await openDatabase(path, version: 1,
-      // crate table
       onCreate: (Database db, int version) async {
-        // When creating the db, create the table
-        await db
-            .execute(
-            'CREATE TABLE Task (id INTEGER PRIMARY KEY, title TEXT, desc TEXT, date TEXT ,status TEXT)')
-            .then((value) {
-          print("table crated");
-        });
-      },
-      onOpen: (database) {
-        print("hello table ");
-        getDataBase(database);
-      });
+    await db.execute(
+      'CREATE TABLE Task (id INTEGER PRIMARY KEY, title TEXT, desc TEXT, date TEXT, status TEXT)',
+    );
+    print("Table created");
+  }, onOpen: (database) {
+    print("Database opened");
+  });
 }
 
+Future<void> insertIntoDatabase({
+  required String title,
+  required String desc,
+  required String date,
+}) async {
+  await database.transaction((txn) async {
+    await txn.rawInsert(
+      'INSERT INTO Task (title, desc, date, status) VALUES(?, ?, ?, ?)',
+      [title, desc, date, "notDone"],
+    );
+    print("Task inserted");
+  });
+}
 
-insertDataBase({
+updateDatabase({
   String? title,
-  String? time,
+  String? desc,
   String? date,
-}) {
-  database.transaction((txn) async {
-    await txn
-        .rawInsert(
-        'INSERT INTO Task (title, time, date, status) VALUES("$title" , "$time", "$date", "notDone")')
-        .then((value) {
-      print("$value inserted Successfully");
-      getDataBase(database);
-
-    }).catchError((error){print(error);});
+  int? id,
+}) async {
+  await database.rawUpdate(
+      'UPDATE Task SET title = ?, desc = ?, date = ? WHERE id = ?',
+      [title, desc, date, id]).then((value) {
+    print("$value record updated");
+    getDataFromDatabase();
+  }).catchError((error) {
+    print("Error updating data: $error");
   });
 }
 
-updateDatabase({String? title , String? time, String? date , int? id}){
-  database.rawUpdate('UPDATE Task SET title = ?, time = ? ,date = ?  WHERE id = ?',
-      [title, time, date, id]).then((value){
-    print("$value is updated");
-    getDataBase(database);
+updateStatus({
+  String? status,
+  int? id,
+}) async {
+  await database.rawUpdate(
+      'UPDATE Task SET status = ? WHERE id = ?', [status, id]).then((value) {
+    print("$value status updated");
+    getDataFromDatabase();
+  }).catchError((error) {
+    print("Error updating status: $error");
   });
 }
 
-updateStatus({String? status , int? id}){
-  database.rawUpdate('UPDATE Task SET status = ?  WHERE id = ?',
-      [status]).then((value){
-    print("$value status is updated");
-    getDataBase(database);
+deleteFromDatabase({int? id}) async {
+  await database.rawDelete('DELETE FROM Task WHERE id = ?', [id]).then((value) {
+    print("$value record deleted");
+    getDataFromDatabase();
+  }).catchError((error) {
+    print("Error deleting data: $error");
   });
 }
 
-// crud
-deleteDataBase({int? id }){
-  database.rawDelete('DELETE FROM Test WHERE id = ?', [id]).then((value){
-    print("$value is deleted ");
-    getDataBase(database);
-  });
-}
-
-List<Map> tasksList =[];
-List<Map> doneTasks =[];
-getDataBase(Database dataBase){
-  dataBase.rawQuery('SELECT * FROM Task').then((value){
-    for(Map<String, Object?> element in value ){
-      tasksList.add(element);
-      if(element['status']== "Done"){
-        doneTasks.add(element);
-      }
-    }
-
-  }).catchError((error){
-    print(error);
-  });
+Future<List<Map<String, dynamic>>> getDataFromDatabase() async {
+  return await database.rawQuery('SELECT * FROM Task');
 }
