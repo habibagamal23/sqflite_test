@@ -32,42 +32,15 @@ Future<void> insertIntoDatabase({
   });
 }
 
-updateDatabase({
-  String? title,
-  String? desc,
-  String? date,
-  int? id,
-}) async {
-  await database.rawUpdate(
-      'UPDATE Task SET title = ?, desc = ?, date = ? WHERE id = ?',
-      [title, desc, date, id]).then((value) {
-    print("$value record updated");
-    getDataFromDatabase();
-  }).catchError((error) {
-    print("Error updating data: $error");
-  });
+Future<void> updateTaskStatusToDone(int id) async {
+  await database
+      .rawUpdate('UPDATE Task SET status = ? WHERE id = ?', ['Done', id]);
+  print("Task status updated to Done");
 }
 
-updateStatus({
-  String? status,
-  int? id,
-}) async {
-  await database.rawUpdate(
-      'UPDATE Task SET status = ? WHERE id = ?', [status, id]).then((value) {
-    print("$value status updated");
-    getDataFromDatabase();
-  }).catchError((error) {
-    print("Error updating status: $error");
-  });
-}
-
-deleteFromDatabase({int? id}) async {
-  await database.rawDelete('DELETE FROM Task WHERE id = ?', [id]).then((value) {
-    print("$value record deleted");
-    getDataFromDatabase();
-  }).catchError((error) {
-    print("Error deleting data: $error");
-  });
+Future<void> deleteFromDatabase(int id) async {
+  await database.rawDelete('DELETE FROM Task WHERE id = ?', [id]);
+  print("Task deleted");
 }
 
 Future<List<Map<String, dynamic>>> getDataFromDatabase() async {

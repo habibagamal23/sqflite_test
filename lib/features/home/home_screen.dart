@@ -26,6 +26,12 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {});
   }
 
+  Future<void> deleteTask(int id) async {
+    await updateTaskStatusToDone(id);
+    await deleteFromDatabase(id);
+    getTasksFromDatabase();
+  }
+
   @override
   Widget build(BuildContext context) {
     // app bar
@@ -44,6 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 return CardTodolist(
                   title: tasks[index]['title'] ?? '',
                   desc: tasks[index]['desc'] ?? '',
+                  onDelete: () => deleteTask(tasks[index]['id'])
                 );
               },
             ),
