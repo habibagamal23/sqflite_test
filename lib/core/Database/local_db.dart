@@ -46,3 +46,8 @@ Future<void> deleteFromDatabase(int id) async {
 Future<List<Map<String, dynamic>>> getDataFromDatabase() async {
   return await database.rawQuery('SELECT * FROM Task');
 }
+
+Future<void> deleteAllTasks() async {
+  await database.rawDelete('DELETE FROM Task');
+  print("All tasks deleted");
+}

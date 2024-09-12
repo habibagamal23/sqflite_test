@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sqflite_test/features/home/screens/welcomScreen.dart';
 import 'package:sqflite_test/features/home/widgets/todo_card.dart';
 
 import '../../../core/Database/local_db.dart';
@@ -6,7 +7,7 @@ import '../../../core/sheardprefrance/shaerd.dart';
 import '../../add_task/add_task_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -14,15 +15,35 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> tasks = [];
-  // final SharedPreferencesHelper _prefsHelper = SharedPreferencesHelper();
-  bool isDarkMode = false;
+  String? _name;
+  final SharedPreferenceHelper _prefsHelper = SharedPreferenceHelper();
 
   @override
   void initState() {
     super.initState();
-    createDatabase();
-    getTasksFromDatabase();
-    // _loadTheme();
+    Intia();
+    loadName();
+  }
+
+  Future<void> loadName() async {
+    String? name = await _prefsHelper.getName();
+    setState(() {
+      _name = name;
+    });
+  }
+
+  void _logout() async {
+    await deleteAllTasks();
+    await _prefsHelper.clearName();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => WelcomeScreen()),
+    );
+  }
+
+  Future<void> Intia() async {
+    await createDatabase();
+    await getTasksFromDatabase();
   }
 
   Future<void> getTasksFromDatabase() async {
@@ -33,35 +54,22 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> deleteTask(int id) async {
     await updateTaskStatusToDone(id);
     await deleteFromDatabase(id);
-    getTasksFromDatabase();
+    await getTasksFromDatabase();
   }
-
-  // void _toggleDarkMode() async {
-  //   isDarkMode = !isDarkMode;
-  //   await _prefsHelper.setTheme(isDarkMode); // حفظ حالة الثيم
-  //   setState(() {});
-  // }
-  //
-  // Future<void> _loadTheme() async {
-  //   isDarkMode = await _prefsHelper.getTheme(); // استرجاع حالة الثيم
-  //   setState(() {});
-  // }
 
   @override
   Widget build(BuildContext context) {
-    // app bar
-    //text
-    //float
     return Scaffold(
       appBar: AppBar(
-        title: Text("Taskes"),
+        title: Text("Taskes  ${_name} "),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(isDarkMode ? Icons.dark_mode : Icons.light_mode),
-            onPressed: (){},
+            icon: Icon(Icons.logout),
+            onPressed: _logout,
           ),
         ],
+
       ),
       body: _buildTaskList(),
       floatingActionButton: FloatingActionButton(
@@ -78,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
               desc: res['description'],
               date: DateTime.now().toString(),
             );
-            getTasksFromDatabase();
+            await getTasksFromDatabase();
           }
         },
       ),
@@ -87,9 +95,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildTaskList() {
     if (tasks.isEmpty) {
-      return Center(child: Text("No tasks available"));
+      return Center(child: Text("Wlcome ${_name} Add u TAsk"));
     }
-
     return ListView.builder(
       itemCount: tasks.length,
       itemBuilder: (context, index) {
