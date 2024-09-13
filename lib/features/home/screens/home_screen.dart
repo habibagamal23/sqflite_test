@@ -3,12 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:sqflite_test/features/home/screens/welcomScreen.dart';
 import '../../../core/Database/local_db.dart';
 import '../../../core/Provider/task_provider.dart';
-import '../../../core/Provider/user_Provider.dart';
-import '../../../core/sheardprefrance/shaerd.dart';
+import '../../../core/Provider/user_provider.dart';
 import '../../add_task/add_task_screen.dart';
 import '../widgets/tasklist.dart';
-import '../widgets/todo_card.dart';
-
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -26,36 +23,35 @@ class _HomeScreenState extends State<HomeScreen> {
     await initDb();
     await Provider.of<TaskProvider>(context, listen: false).loadTasks();
   }
-  String? _name;
-  final SharedPreferenceHelper _prefsHelper = SharedPreferenceHelper();
+
   Future<void> initDb() async {
     await createDatabase();
-    loadName();
-  }
-
-  Future<void> loadName() async {
-    String? name = await _prefsHelper.getName();
-    setState(() {
-      _name = name;
-    });
+    // Load the name from the UserProvider
+    await Provider.of<UserProvider>(context, listen: false).loadName();
   }
 
   void _logout() async {
+    // Delete all tasks from the local database
     await deleteAllTasks();
-    await _prefsHelper.clearName();
+    // Clear the name using UserProvider
+    await Provider.of<UserProvider>(context, listen: false).clearName();
+    // Navigate back to the WelcomeScreen
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => WelcomeScreen()),
     );
   }
+
   @override
   Widget build(BuildContext context) {
+    // Access TaskProvider and UserProvider
     final taskProvider = Provider.of<TaskProvider>(context);
-    // final userProvider = Provider.of<UserProvider>(context);
+    final userProvider = Provider.of<UserProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Tasks of ${_name}"),
+        // Display the user's name from the UserProvider
+        title: Text("Tasks of ${userProvider.name ?? 'Guest'}"),
         centerTitle: true,
         actions: [
           IconButton(
@@ -74,9 +70,6 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         },
       ),
-
-
     );
   }
-
 }

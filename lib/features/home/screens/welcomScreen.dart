@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../core/Provider/user_Provider.dart';
-import '../../../core/sheardprefrance/shaerd.dart';
+import '../../../core/Provider/user_provider.dart';
 import 'home_screen.dart';
 
 class WelcomeScreen extends StatefulWidget {
@@ -11,32 +10,33 @@ class WelcomeScreen extends StatefulWidget {
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
   final TextEditingController _nameController = TextEditingController();
-  final SharedPreferenceHelper _prefsHelper = SharedPreferenceHelper();
 
   @override
   void initState() {
     super.initState();
-    _checkIfNameExists();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<UserProvider>(context, listen: false).loadName().then((_) {
+        final name = Provider.of<UserProvider>(context, listen: false).name;
+        if (name != null && name.isNotEmpty) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => HomeScreen()),
+          );
+        }
+      });
+    });
   }
 
-  void _checkIfNameExists() async {
-    String? name = await _prefsHelper.getName();
-    if (name != null && name.isNotEmpty) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
-      );
-    }
-  }
-  void _goToNextScreen() async {
-    String name = _nameController.text;
+  void _goToNextScreen() {
+    final name = _nameController.text;
     if (name.isNotEmpty) {
-      await _prefsHelper.setName(name);
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
-      );
-      print('Welcome, $name');
+      Provider.of<UserProvider>(context, listen: false).setName(name).then((_) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
+        print('Welcome, $name');
+      });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter your name')),
