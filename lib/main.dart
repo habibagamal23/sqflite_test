@@ -1,73 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 import 'package:sqflite_test/features/home/screens/home_screen.dart';
 
+import 'core/Provider/task_provider.dart';
+import 'core/Provider/user_Provider.dart';
 import 'features/home/screens/welcomScreen.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        // ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => TaskProvider()),
+      ],
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      theme: ThemeData(
+      title: 'Provider & SharedPreferences Demo',
+      home: WelcomeScreen()
 
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home:  WelcomeScreen(),
+
     );
   }
 }
-
-//// frist example
-class TestScreen extends StatefulWidget {
-  @override
-  _TestScreenState createState() => _TestScreenState();
-}
-
-class _TestScreenState extends State<TestScreen> {
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Shared Preferences'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: ()  async {
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                await prefs.setString('name', 'Habiba');
-              },
-              child: Text('Set Name'),
-            ),
-            SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: () async {
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                String? name = prefs.getString('name');
-                print(name);
-              },
-              child: Text('Get Name'),
-            ),
-
-          ],
-        ),
-      ),
-    );
-  }
-}
-

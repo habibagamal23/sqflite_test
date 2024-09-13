@@ -1,21 +1,23 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPreferenceHelper {
-  static const String _keyName = 'name';
+  static const String _nameKey = "username";
 
-  Future<void> setName(String name) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyName, name);
-  }
-
+  // Get the stored name
   Future<String?> getName() async {
-
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_keyName);
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_nameKey);
   }
 
+  // Set the name in shared preferences
+  Future<void> setName(String name) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_nameKey, name);
+  }
+
+  // Clear the name
   Future<void> clearName() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_keyName);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_nameKey);
   }
 }

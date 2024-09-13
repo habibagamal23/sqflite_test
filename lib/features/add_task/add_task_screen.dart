@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../core/Provider/task_provider.dart';
 
 class AddTaskScreen extends StatefulWidget {
   const AddTaskScreen({super.key});
@@ -14,7 +17,16 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   final TextEditingController desccontroller = TextEditingController();
 
   @override
+  void dispose() {
+    titlecontroller.dispose();
+    desccontroller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final taskProvider = Provider.of<TaskProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Add your todo list"),
@@ -53,12 +65,10 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
               ),
               SizedBox(height: 10),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async{
                   if (formKey.currentState!.validate()) {
-                    Navigator.pop(context, {
-                      "title": titlecontroller.text,
-                      "description": desccontroller.text,
-                    });
+                    await taskProvider.addTask(titlecontroller.text,desccontroller.text);
+                    Navigator.pop(context);
                   }
                 },
                 child: Text("Add task"),

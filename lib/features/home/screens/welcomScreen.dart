@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:sqflite_test/features/home/screens/home_screen.dart';
+import 'package:provider/provider.dart';
+import '../../../core/Provider/user_Provider.dart';
 import '../../../core/sheardprefrance/shaerd.dart';
+import 'home_screen.dart';
 
 class WelcomeScreen extends StatefulWidget {
   @override
@@ -54,13 +56,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-          const  Text(
+            const Text(
               'Welcome to our TodoList app',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
-
-            const  SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             TextField(
               controller: _nameController,
               decoration: const InputDecoration(
