@@ -16,21 +16,23 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  String? _name;
+  final SharedPreferenceHelper _prefsHelper = SharedPreferenceHelper();
+
+
+
   @override
   void initState() {
     super.initState();
-    initDbAndLoadData();
+    initDb();
   }
 
-  Future<void> initDbAndLoadData() async {
-    await initDb();
-    await Provider.of<TaskProvider>(context, listen: false).loadTasks();
-  }
-  String? _name;
-  final SharedPreferenceHelper _prefsHelper = SharedPreferenceHelper();
+
   Future<void> initDb() async {
     await createDatabase();
+    await Provider.of<TaskProvider>(context, listen: false).loadTasks();
     loadName();
+
   }
 
   Future<void> loadName() async {
