@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite_test/features/home/widgets/todo_card.dart';
 
-import '../../core/Database/local_db.dart';
-import '../add_task/add_task_screen.dart';
+import '../../../core/Database/local_db.dart';
+import '../../add_task/add_task_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
