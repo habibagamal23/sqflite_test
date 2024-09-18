@@ -9,7 +9,6 @@ import '../../add_task/add_task_screen.dart';
 import '../widgets/tasklist.dart';
 import '../widgets/todo_card.dart';
 
-
 class HomeScreen extends StatefulWidget {
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -19,20 +18,16 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _name;
   final SharedPreferenceHelper _prefsHelper = SharedPreferenceHelper();
 
-
-
   @override
   void initState() {
     super.initState();
     initDb();
   }
 
-
   Future<void> initDb() async {
     await createDatabase();
     await Provider.of<TaskProvider>(context, listen: false).loadTasks();
     loadName();
-
   }
 
   Future<void> loadName() async {
@@ -50,6 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
       MaterialPageRoute(builder: (context) => WelcomeScreen()),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     final taskProvider = Provider.of<TaskProvider>(context);
@@ -76,9 +72,6 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         },
       ),
-
-
     );
   }
-
 }
